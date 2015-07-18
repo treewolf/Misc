@@ -11,4 +11,4 @@ options:
 which automatically then starts a new song.
 
 Recommended language:
-- python
+- perl
