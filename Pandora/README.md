@@ -7,7 +7,7 @@ Vital, to get program to interect with system settings : Calendar, and time.
 options:
 - change day to tomorrow, refresh pandora, and should skip.
 - change time to end of song, refresh pandora, should skip. - dont know if this will work.
-- go through all the stations in order from the one below the Wanted station, cyclcying until hittin gthe Wanted station,
+- go through all the stations in order from the one below the Wanted station, cycling until hitting the Wanted station,
 which automatically then starts a new song.
 
 Recommended language:
