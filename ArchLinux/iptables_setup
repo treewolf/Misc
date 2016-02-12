@@ -26,7 +26,7 @@ iptables -A INPUT -i all -p udp -m multiport --sport 68,67 -m multiport --dport 
 iptables -A INPUT -i all -p udp --sport 123 --dport 123 -j ACCEPT
 iptables -A INPUT -i all -p udp --sport 636 --dport 636 -j ACCEPT
 
-iptables -A OUTPUT -o all -p tcp --sport 22 --dport 22 -j ACCEPT
+iptables -A INPUT -i all -p tcp --sport 22 --dport 22 -m --state ESTABLISHED,RELATED -j ACCEPT
 iptables -A INPUT -i all -p tcp -m multiport --sport 80,445 -m multiport --dport 80,443 -m state --state NEW,ESTABLISHED -j ACCEPT
 iptables -A INPUT -i all -p tcp --sport 631 --dport 631 -j ACCEPT
 iptables -A INPUT -i all -p tcp --sport 636 --dport 636 -j ACCEPT
