@@ -9,8 +9,8 @@ iptables -X
 iptables -P INPUT DROP
 iptables -P FORWARD DROP
 iptables -P OUTPUT DROP
-iptables -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
-iptables -A OUTPUT -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j ACCEPT
+iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+iptables -A OUTPUT -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
 
 # Enable loopback access
 iptables -A INPUT -i lo -j ACCEPT
