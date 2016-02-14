@@ -1,9 +1,14 @@
-#!/usr/bin/sh
+#!/bin/sh
 # Written by treewolf
 # Must be run with root permissions
 
 iptables -F
 iptables -X
+
+# Declare user-made chains
+iptables -N tcp
+iptables -A INPUT -p tcp -j tcp
+iptables -N logdrop
 
 # Setup default policies
 iptables -P INPUT DROP
@@ -27,7 +32,7 @@ iptables -A INPUT -i all -p udp --sport 123 --dport 123 -j ACCEPT
 iptables -A INPUT -i all -p udp --sport 636 --dport 636 -j ACCEPT
 
 iptables -A INPUT -i all -p tcp --sport 22 --dport 22 -m state --state ESTABLISHED,RELATED -j ACCEPT
-iptables -A INPUT -i all -p tcp -m multiport --sport 80,443 -m multiport --dport 80,443 -m state --state NEW,ESTABLISHED -j ACCEPT
+iptables -A INPUT -i all -p tcp -m multiport --sport 80,443 -m multiport --dport 80,443 -m state --state ESTABLISHED,RELATED -j ACCEPT
 iptables -A INPUT -i all -p tcp --sport 631 --dport 631 -j ACCEPT
 iptables -A INPUT -i all -p tcp --sport 636 --dport 636 -j ACCEPT
 
@@ -37,9 +42,21 @@ iptables -A OUTPUT -o all -p udp --sport 123 --dport 123 -j ACCEPT
 iptables -A OUTPUT -o all -p udp --sport 636 --dport 636 -j ACCEPT
 
 iptables -A OUTPUT -o all -p tcp --sport 22 --dport 22 -j ACCEPT
-iptables -A OUTPUT -o all -p tcp -m multiport --sport 80,443 -m multiport --dport 80,443 -m state --state ESTABLISHED,RELATED -j ACCEPT
+iptables -A OUTPUT -o all -p tcp -m multiport --sport 80,443 -m multiport --dport 80,443 -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
 iptables -A OUTPUT -o all -p tcp --sport 631 --dport 631 -j ACCEPT
 iptables -A OUTPUT -o all -p tcp --sport 636 --dport 636 -j ACCEPT
+
+# Chain tcp. Filters all tcp traffic, drops if matches potential attack patterns,
+#	else lets it continue INPUT chain
+
+
+# Chain logdrop. Everything that is passed to this chain will be logged and then dropped.
+# This chain MUST be below all other INPUT and OUTPUT rules or else wrong traffic may be blocked.
+iptables -A INPUT -j logdrop
+iptables -A OUTPUT -j logdrop
+iptables -A FORWARD -j logdrop
+iptables -A logdrop -p all -m limit --limit 2/min -j LOG --log-prefix "Dropped: " --log-level warning
+iptables -A logdrop -j DROP
 
 iptables-save > /etc/iptables/iptables.rules
 systemctl enable iptables.service
