@@ -2,8 +2,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+/* Adjusts volume from volume scale. Uses unsigned integers 0 - 100 inclusive */
 void adjustVolume(GtkWidget * item){
-	system("amixer sset 'Master' 50%");
+	char * cmd;
+	cmd = (char *) calloc(30, sizeof (char *));
+	sprintf(cmd, "amixer sset 'Master' %u%%", (unsigned int)gtk_range_get_value(GTK_RANGE (item)));
+	system(cmd);
 }
 
 int main(int argc, char *argv[]){
