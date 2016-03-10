@@ -3,28 +3,34 @@
 #include <stdio.h>
 
 /* Gets current volume and adjusts scale */
-//void initializeVolumeScale(GtkWidget * item){
+void initializeVolumeScale(GtkWidget * item){
+	unsigned int preset = 50.0;
+	gtk_range_set_value(GTK_RANGE (item), preset);
+	system("amixer sset 'Master 50%");
+	system("amixer sset 'Master' unmute");
+	system("amixer sset 'PCM' 100%");
+	system("amixer sset 'PCM' unmute");
+	system("amixer sset 'Mic' 100%");
+	system("amixer sset 'Mic' unmute");
+}
 
-//	double vol = system("amixer get 'Master' | grep -m 1 % | awk '{print $5}' | sed 's/[^0-9]//g'", intern=TRUE);
-//	printf("%f", vol);
-//	FILE * out = popen("amixer get 'Master' | grep -m 1 % | awk '{print $5}' | sed 's/[^0-9]//g'")
-	
-	//gtk_range_set_value(GTK_RANGE (item), vol);
-//}
 /* Adjusts volume from volume scale. Uses unsigned integers 0 - 100 inclusive */
 void adjustVolume(GtkWidget * item){
 	char * cmd;
 	cmd = (char *) calloc(30, sizeof (char *));
 	sprintf(cmd, "amixer sset 'Master' %u%%", (unsigned int)gtk_range_get_value(GTK_RANGE (item)));
 	system(cmd);
+	free(cmd);
 }
 
 /* Mutes or unmutes volume */
 void muteVolume(GtkWidget * item){
 	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON (item)))
 		system("amixer set 'Master' mute");
-	else
-		system("amixer set 'Master' unmute");
+	else{
+		system("amixer sset 'Master' unmute");
+		system("amixer sset 'PCM' unmute");
+	}
 }
 
 int main(int argc, char *argv[]){
@@ -68,7 +74,7 @@ int main(int argc, char *argv[]){
 	gtk_scale_add_mark(GTK_SCALE (page_volume_scale), 75, GTK_POS_RIGHT, "75");
 	gtk_scale_add_mark(GTK_SCALE (page_volume_scale), 100, GTK_POS_RIGHT, "100");
 	gtk_scale_set_draw_value(GTK_SCALE (page_volume_scale), 1);
-//	initializeVolumeScale(page_volume_scale);
+	initializeVolumeScale(page_volume_scale);
 	/* scale label, Master */
 	page_volume_scale_label = gtk_label_new("Master");
 	/* checkbox for mute option */
