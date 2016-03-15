@@ -4,9 +4,8 @@
 
 /* Gets current volume and adjusts scale */
 void initializeVolumeScale(GtkWidget * item){
-	unsigned int preset = 50.0;
-	gtk_range_set_value(GTK_RANGE (item), preset);
-	system("amixer sset 'Master 50%");
+	gtk_range_set_value(GTK_RANGE (item), 70.0);
+	system("amixer sset 'Master' 70%");
 	system("amixer sset 'Master' unmute");
 	system("amixer sset 'PCM' 100%");
 	system("amixer sset 'PCM' unmute");
@@ -14,11 +13,11 @@ void initializeVolumeScale(GtkWidget * item){
 	system("amixer sset 'Mic' unmute");
 }
 
-/* Adjusts volume from volume scale. Uses unsigned integers 0 - 100 inclusive */
+/* Adjusts volume from volume scale. Uses double 0 - 100 inclusive */
 void adjustVolume(GtkWidget * item){
 	char * cmd;
 	cmd = (char *) calloc(30, sizeof (char *));
-	sprintf(cmd, "amixer sset 'Master' %u%%", (unsigned int)gtk_range_get_value(GTK_RANGE (item)));
+	sprintf(cmd, "amixer sset 'Master' %d%%", (int) gtk_range_get_value(GTK_RANGE (item)));
 	system(cmd);
 	free(cmd);
 }
@@ -31,6 +30,11 @@ void muteVolume(GtkWidget * item){
 		system("amixer sset 'Master' unmute");
 		system("amixer sset 'PCM' unmute");
 	}
+}
+
+/* opens firefox for browser button */
+void openFirefox(){
+	system("firefox");
 }
 
 int main(int argc, char *argv[]){
@@ -47,6 +51,9 @@ int main(int argc, char *argv[]){
 	GtkWidget * page_volume_scale;
 	GtkWidget * page_volume_scale_label;
 	GtkWidget * page_volume_mute_toggle;
+	GtkWidget * page_browser_label;
+	GtkWidget * page_browser_grid;
+	GtkWidget * page_browser_button;
 
 	gtk_init(&argc, &argv);
 
@@ -78,7 +85,7 @@ int main(int argc, char *argv[]){
 	/* scale label, Master */
 	page_volume_scale_label = gtk_label_new("Master");
 	/* checkbox for mute option */
-	page_volume_mute_toggle = gtk_toggle_button_new_with_label("Muted");
+	page_volume_mute_toggle = gtk_toggle_button_new_with_label("Mute / Unmute");
 	/* page grid for layout */
 	page_volume_grid = gtk_grid_new();
 	gtk_grid_attach(GTK_GRID (page_volume_grid), spacer, 0, 0, 5, 20);
@@ -88,10 +95,31 @@ int main(int argc, char *argv[]){
 	gtk_widget_set_vexpand(page_volume_scale, TRUE);
 	gtk_grid_attach(GTK_GRID (page_volume_grid), page_volume_mute_toggle, 7, 50, 4, 4);
 	/* page */
-	gtk_notebook_append_page(GTK_NOTEBOOK (notebook),page_volume_grid,page_volume_label);
+	gtk_notebook_insert_page(GTK_NOTEBOOK (notebook),page_volume_grid,page_volume_label, 0);
 	/* signal listener */
 	g_signal_connect(page_volume_scale, "value-changed", G_CALLBACK (adjustVolume), page_volume_scale);
 	g_signal_connect(page_volume_mute_toggle, "toggled", G_CALLBACK (muteVolume), page_volume_mute_toggle);
+
+	/* Page BROWSER config */
+	/* page label */
+	page_browser_label = gtk_label_new("Web Browser");
+	/* page button to open browser */
+	page_browser_button = gtk_button_new_with_label("Start Firefox");
+	/*page grid */
+	page_browser_grid = gtk_grid_new();
+	spacer = gtk_label_new(" ");
+	gtk_grid_attach(GTK_GRID (page_browser_grid), spacer, 0, 0, 10, 10);
+	gtk_grid_attach(GTK_GRID (page_browser_grid), page_browser_button, 10, 10, 15, 5);
+	spacer = gtk_label_new(" ");
+	gtk_grid_attach(GTK_GRID (page_browser_grid), spacer, 10, 5, 10, 10);
+//	gtk_widget_set_hexpand(page_browser_button, TRUE);
+//	gtk_widget_set_vexpand(page_browser_button, TRUE);
+	/*page */
+	gtk_notebook_insert_page(GTK_NOTEBOOK (notebook), page_browser_grid, page_browser_label, 1);
+	/* listeners */
+	g_signal_connect(page_browser_button, "released", G_CALLBACK (openFirefox), NULL);
+
+	/* Finally ... */
 	gtk_widget_show_all(window);
 	gtk_main ();    
 	return 0;
