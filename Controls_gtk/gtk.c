@@ -7,8 +7,11 @@ void initializeVolumeScale(GtkWidget * item){
 	gtk_range_set_value(GTK_RANGE (item), 70.0);
 	system("amixer sset 'Master' 70%");
 	system("amixer sset 'Master' unmute");
-	system("amixer sset 'PCM' 100%");
 	system("amixer sset 'PCM' unmute");
+	system("amixer sset 'Speaker' 100%");
+	system("amixer sset 'Speaker' unmute");
+	system("amixer sset 'Headphone' 30%");
+	system("amixer sset 'Headphone' unmute");
 	system("amixer sset 'Mic' 100%");
 	system("amixer sset 'Mic' unmute");
 }
@@ -28,13 +31,15 @@ void muteVolume(GtkWidget * item){
 		system("amixer set 'Master' mute");
 	else{
 		system("amixer sset 'Master' unmute");
-		system("amixer sset 'PCM' unmute");
+		system("amixer sset 'Speaker' unmute");
+		system("amixer sset 'Headphone' unmute");
 	}
 }
 
 /* opens firefox for browser button */
-void openFirefox(){
-	system("firefox");
+void openFirefox(GtkWidget * item){
+	system("firefox &");  //  $! > .Controls");
+	
 }
 
 int main(int argc, char *argv[]){
@@ -54,6 +59,7 @@ int main(int argc, char *argv[]){
 	GtkWidget * page_browser_label;
 	GtkWidget * page_browser_grid;
 	GtkWidget * page_browser_button;
+	//GtkWidget * page_browser_pid_label;
 
 	gtk_init(&argc, &argv);
 
@@ -105,6 +111,8 @@ int main(int argc, char *argv[]){
 	page_browser_label = gtk_label_new("Web Browser");
 	/* page button to open browser */
 	page_browser_button = gtk_button_new_with_label("Start Firefox");
+	/* page pid  label that shows pid of browsers */
+	//page_browser_pid_label = gtk_label_new("Test");
 	/*page grid */
 	page_browser_grid = gtk_grid_new();
 	spacer = gtk_label_new(" ");
@@ -112,12 +120,11 @@ int main(int argc, char *argv[]){
 	gtk_grid_attach(GTK_GRID (page_browser_grid), page_browser_button, 10, 10, 15, 5);
 	spacer = gtk_label_new(" ");
 	gtk_grid_attach(GTK_GRID (page_browser_grid), spacer, 10, 5, 10, 10);
-//	gtk_widget_set_hexpand(page_browser_button, TRUE);
-//	gtk_widget_set_vexpand(page_browser_button, TRUE);
+	//gtk_grid_attach(GTK_GRID (page_browser_grid), page_browser_pid_label, 20, 50, 10, 5);
 	/*page */
 	gtk_notebook_insert_page(GTK_NOTEBOOK (notebook), page_browser_grid, page_browser_label, 1);
 	/* listeners */
-	g_signal_connect(page_browser_button, "released", G_CALLBACK (openFirefox), NULL);
+	g_signal_connect(page_browser_button, "released", G_CALLBACK (openFirefox), spacer);//page_browser_pid_label);
 
 	/* Finally ... */
 	gtk_widget_show_all(window);
