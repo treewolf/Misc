@@ -5,7 +5,10 @@ To compile the code:
 ```bash
 ./make gtk.c
 ```
-To run the executable, double click and execute.
+To run the executable:
+```bash
+./Controls&
+```
 
 Local requirements:
 - amixer
