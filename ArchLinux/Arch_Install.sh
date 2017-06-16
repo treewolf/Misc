@@ -36,7 +36,7 @@ genfstab -U -p /mnt >> /mnt/etc/fstab
 arch-chroot /mnt /bin/bash
 
 # add hostname
-echo "$HOSTNAME" > /etc/hostname
+echo "${HOSTNAME}" > /etc/hostname
 
 # Chnage /etc/locale.gen 
 #	- uncomment en_US.UTF-8 
@@ -54,12 +54,13 @@ pacman -Syu --noconfirm
 
 echo "Set root password: "
 passwd
-useradd -mg users -G wheel,storage,power -s /bin/bash $USERNAME
-echo "Set $USERNAME password: "
-passwd $USERNAME
+useradd -mg users -G wheel,storage,power -s /bin/bash ${USERNAME}
+echo "Set ${USERNAME} password: "
+passwd ${USERNAME}
 
 pacman -S --noconfirm sudo
 # sudo visudo manually if script throws error
+sudo visudo
 # Defaults:ALL timestamp_timeout=0
 
 pacman -S --noconfirm grub
