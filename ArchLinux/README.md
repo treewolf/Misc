@@ -2,7 +2,9 @@ Step 1:
 	Format your three partitions
 	```
 	curl http://raw.githubusercontent.com/treewolf/Misc/master/ArchLinux/install_1.sh > install_1.sh
+	
 	chmod +x install_1.sh
+	
 	./install_1.sh
 	```
 
