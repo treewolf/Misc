@@ -16,5 +16,5 @@ Step 3: Fill in the necessary variables in the top of the file
 
 Step 4: Run
 ```bash
-	./install.sh [1 } 2 | 3]
+	./install.sh [1 | 2 | 3]
 ```
