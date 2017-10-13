@@ -1,6 +1,5 @@
 ﻿/*
  * Created by SharpDevelop.
- * User: Josh
  * Date: 12/20/2015
  * Time: 20:11
  * 
