@@ -70,7 +70,7 @@ elif [ ${2} -eq "2" ]; then
 	sed -i -e '/^HOOKS/c/HOOKS="base udev resume autodetect modconf keyboard keymap block encrypt lvm2 filesystems fsck"' /etc/mkinitcpio.conf
 	mkinitcpio -p linux
 
-	#nano /etc/pacman.conf
+	#nano /etc/pacman.conf if want more repositories
 
 	pacman -Syu --noconfirm
 	echo "Set root password: "
@@ -95,7 +95,7 @@ elif [ ${2} -eq "2" ]; then
 	grub-mkconfig -o /boot/grub/grub.cfg
 	pacman -S --noconfirm iw wpa_supplicant connman
 	systemctl enable connman
-	pacman -S --noconfirm xorg xorg-apps xorg-server mesa
+	pacman -S --noconfirm xorg xorg-apps xorg-init xorg-server mesa
 	# volume
 	pacman -S --noconfirm alsa-utils
 
