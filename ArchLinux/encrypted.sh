@@ -95,7 +95,7 @@ elif [ ${1} -eq "2" ]; then
 	grub-mkconfig -o /boot/grub/grub.cfg
 	pacman -S --noconfirm iw wpa_supplicant connman
 	systemctl enable connman
-	pacman -S --noconfirm xorg xorg-apps xorg-init xorg-server mesa
+	pacman -S --noconfirm xorg-apps xorg-server xorg
 	# volume
 	pacman -S --noconfirm alsa-utils
 
@@ -108,7 +108,7 @@ elif [ ${1} -eq "2" ]; then
 	esac
 
 	echo "DONE INSTALLATION. AFTER REBOOT READ 'post installation' SECTION"
-	echo "Before rebooting, type \n./"${0}" 3" 
+	echo "Before rebooting, type /n./"${0}" 3" 
 	exit
 elif [ ${1} -eq "3" }; then
 	umount -R /mnt && reboot
