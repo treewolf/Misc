@@ -67,7 +67,7 @@ elif [ ${1} -eq "2" ]; then
 	ln -s /usr/share/zoneinfo/America/Los_Angeles /etc/localtime
 	hwclock --systohc --utc
 	
-	sed -i -e '/^HOOKS/c\HOOKS="base systemd resume autodetect modconf keyboard keymap block encrypt sd-lvm2 filesystems fsck"' /etc/mkinitcpio.conf
+	sed -i -e '/^HOOKS/c\HOOKS="base systemd keyboard autodetect modconf sd-vconsole block sd-lvm2 filesystems fsck"' /etc/mkinitcpio.conf
 	mkinitcpio -p linux
 
 	#nano /etc/pacman.conf if want more repositories
