@@ -51,7 +51,7 @@ if [ ${1} -eq "1" ]; then
 	pacstrap -i /mnt base base-devel
 	genfstab -U -p /mnt >> /mnt/etc/fstab
 	arch-chroot /mnt /bin/bash
-elif [ ${2} -eq "2" ]; then
+elif [ ${1} -eq "2" ]; then
 	echo "Part 2"; sleep 3
 	# add hostname
 	echo "${HOSTNAME}" > /etc/hostname
@@ -67,7 +67,7 @@ elif [ ${2} -eq "2" ]; then
 	ln -s /usr/share/zoneinfo/America/Los_Angeles /etc/localtime
 	hwclock --systohc --utc
 	
-	sed -i -e '/^HOOKS/c/HOOKS="base udev resume autodetect modconf keyboard keymap block encrypt lvm2 filesystems fsck"' /etc/mkinitcpio.conf
+	sed -i -e '/^HOOKS/c\HOOKS="base systemd resume autodetect modconf keyboard keymap block encrypt sd-lvm2 filesystems fsck"' /etc/mkinitcpio.conf
 	mkinitcpio -p linux
 
 	#nano /etc/pacman.conf if want more repositories
@@ -110,7 +110,7 @@ elif [ ${2} -eq "2" ]; then
 	echo "DONE INSTALLATION. AFTER REBOOT READ 'post installation' SECTION"
 	echo "Before rebooting, type \n./"${0}" 3" 
 	exit
-elif [ ${3} -eq "3" }; then
+elif [ ${1} -eq "3" }; then
 	umount -R /mnt && reboot
 else
 	echo "./${0} 1		Setup partitions"
