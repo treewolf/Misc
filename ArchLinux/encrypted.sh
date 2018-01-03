@@ -50,6 +50,7 @@ if [ ${1} -eq "1" ]; then
 	mount /dev/sda1 /mnt/boot
 	pacstrap -i /mnt base base-devel
 	genfstab -U -p /mnt >> /mnt/etc/fstab
+	cp ${0} /mnt/
 	arch-chroot /mnt /bin/bash
 elif [ ${1} -eq "2" ]; then
 	echo "Part 2"; sleep 3
