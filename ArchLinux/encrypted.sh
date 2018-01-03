@@ -111,7 +111,8 @@ elif [ ${1} -eq "2" ]; then
 	esac
 
 	echo "DONE INSTALLATION. AFTER REBOOT READ 'post installation' SECTION"
-	echo "Before rebooting, type /n./"${0}" 3" 
+	echo "Before rebooting, type"
+	echo "	./"${0}" 3" 
 	exit
 elif [ ${1} -eq "3" ]; then
 	umount -R /mnt && reboot
