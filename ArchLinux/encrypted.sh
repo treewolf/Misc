@@ -112,12 +112,12 @@ elif [ ${1} -eq "2" ]; then
 
 	echo "DONE INSTALLATION. AFTER REBOOT READ 'post installation' SECTION"
 	echo "Before rebooting, type"
-	echo "	./"${0}" 3" 
+	echo "	sh ${0} 3" 
 	exit
 elif [ ${1} -eq "3" ]; then
 	umount -R /mnt && reboot
 else
-	echo "./${0} 1		Setup partitions"
-	echo "./${0} 2		Installation"
-	echo "./${0} 3		Clean up"
+	echo "sh ${0} 1		Setup partitions"
+	echo "sh ${0} 2		Installation"
+	echo "sh ${0} 3		Clean up"
 fi
