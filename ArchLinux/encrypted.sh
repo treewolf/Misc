@@ -20,7 +20,8 @@ SIZE_SWAP=
 
 # uuid of the root partition
 # run 'blkid' and look for the root
-ROOT_UUID=`blkid|grep -oP '(?<=/dev/sda2: UUID=")[0-9,a-f,-]*'`
+#ROOT_UUID=`blkid|grep -oP '(?<=/dev/sda2: UUID=")[0-9,a-f,-]*'`
+DEV_UUID=`uuidgen`
 
 # Hostname of computer system
 HOSTNAME=
@@ -34,7 +35,7 @@ IS_LAPTOP=
 ##### MAKE SURE ABOVE STEPS ARE COMPLETED ######
 
 if [ ${1} -eq "1" ]; then 
-	cryptsetup luksFormat /dev/sda2
+	cryptsetup luksFormat --uuid={DEV_UUID} /dev/sda2
 	cryptsetup open /dev/sda2 cryptolvm
 	pvcreate /dev/mapper/cryptolvm
 	vgcreate ${VOLUME} /dev/mapper/cryptolvm
@@ -92,7 +93,7 @@ elif [ ${1} -eq "2" ]; then
 
 	pacman -S --noconfirm grub
         echo 'GRUB_PRELOAD_MODULES="lvm"' >> /etc/default/grub
-	echo 'GRUB_CMDLINE_LINUX="luks.uuid=${ROOT_UUID}"' >> /etc/default/grub
+	#echo 'GRUB_CMDLINE_LINUX="luks.uuid=${ROOT_UUID}"' >> /etc/default/grub
         cryptdevice=/dev/${VOLUME}/root:${VOLUME}-root
         root=/dev/mapper/${VOLUME}-root
         swap=/dev/mapper/${VOLUME}-swap
