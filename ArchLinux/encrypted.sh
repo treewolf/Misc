@@ -5,9 +5,6 @@
 #	- clear all partitions
 #	- /dev/sda1 = /boot partition type 8300 with x>=100M
 #	- /dev/sda2 = partition with type 8E00 that will be encrypted and contain /home /root and /swap
-parted -s /dev/sda mklabel msdos
-parted -s /dev/sda -a optimal mkpart primary 2MB 110MB set 1 boot on
-parted -s /dev/sda -a optimal mkpart primary 110MB 100% set 2 lvm on
 
 # ALL GLOBAL VARIABLES BE SET HERE
 
@@ -35,6 +32,10 @@ IS_LAPTOP=
 ##### MAKE SURE ABOVE STEPS ARE COMPLETED ######
 
 if [ ${1} -eq "1" ]; then 
+	parted -s /dev/sda mklabel msdos
+	parted -s /dev/sda -a optimal mkpart primary 2MB 110MB set 1 boot on
+	parted -s /dev/sda -a optimal mkpart primary 110MB 100% set 2 lvm on
+	
 	cryptsetup luksFormat --uuid=${DEV_UUID} /dev/sda2
 	cryptsetup open /dev/sda2 cryptolvm
 	pvcreate /dev/mapper/cryptolvm
