@@ -20,7 +20,7 @@ SIZE_SWAP=
 
 # uuid of the root partition
 # run 'blkid' and look for the root
-ROOT_UUID=
+ROOT_UUID=`blkid|grep -oP '(?<=/dev/sda2: UUID=")[0-9,a-f,-]*'`
 
 # Hostname of computer system
 HOSTNAME=
@@ -92,7 +92,7 @@ elif [ ${1} -eq "2" ]; then
 
 	pacman -S --noconfirm grub
         echo 'GRUB_PRELOAD_MODULES="lvm"' >> /etc/default/grub
-	echo 'GRUB_CMDLINE_LINUX="luks.uuid=`blkdid|grep -oP '(?<=/dev/sda2: UUID=")[0-9,a-f,-]*'`"
+	echo 'GRUB_CMDLINE_LINUX="luks.uuid=${ROOT_UUID}"' >> /etc/default/grub
         cryptdevice=/dev/${VOLUME}/root:${VOLUME}-root
         root=/dev/mapper/${VOLUME}-root
         swap=/dev/mapper/${VOLUME}-swap
