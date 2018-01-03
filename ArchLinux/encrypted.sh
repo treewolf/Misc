@@ -110,7 +110,7 @@ elif [ ${1} -eq "2" ]; then
 	echo "DONE INSTALLATION. AFTER REBOOT READ 'post installation' SECTION"
 	echo "Before rebooting, type /n./"${0}" 3" 
 	exit
-elif [ ${1} -eq "3" }; then
+elif [ ${1} -eq "3" ]; then
 	umount -R /mnt && reboot
 else
 	echo "./${0} 1		Setup partitions"
