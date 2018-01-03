@@ -67,7 +67,9 @@ elif [ ${1} -eq "2" ]; then
 	ln -s /usr/share/zoneinfo/America/Los_Angeles /etc/localtime
 	hwclock --systohc --utc
 	
-	sed -i -e '/^HOOKS/c\HOOKS="base systemd keyboard autodetect modconf sd-vconsole block sd-lvm2 filesystems fsck"' /etc/mkinitcpio.conf
+	sed -i -e '/^HOOKS/c\HOOKS=(base systemd keyboard autodetect modconf sd-vconsole block sd-lvm2 filesystems fsck)' /etc/mkinitcpio.conf
+	#create vconsole.conf because not made automatically
+	touch /etc/vconsole.conf
 	mkinitcpio -p linux
 
 	#nano /etc/pacman.conf if want more repositories
