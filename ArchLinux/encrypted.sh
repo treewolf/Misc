@@ -35,7 +35,7 @@ IS_LAPTOP=
 ##### MAKE SURE ABOVE STEPS ARE COMPLETED ######
 
 if [ ${1} -eq "1" ]; then 
-	cryptsetup luksFormat --uuid={DEV_UUID} /dev/sda2
+	cryptsetup luksFormat --uuid=${DEV_UUID} /dev/sda2
 	cryptsetup open /dev/sda2 cryptolvm
 	pvcreate /dev/mapper/cryptolvm
 	vgcreate ${VOLUME} /dev/mapper/cryptolvm
