@@ -132,6 +132,8 @@ elif [ ${1} -eq "post" ]; then
 		#URxvt*font: 8x13 ##if ttf-hack not installed
 	pacman -S ttf-hack #must edit /usr/share/fonts/40* and 60*, put hack first
 	
+	# configs
+	echo -e "xset b off &\nexec i3" > /home/${USERNAME}/.xinitrc
 elif [ ${1} -eq "3" ]; then
 	umount -R /mnt && reboot
 else
