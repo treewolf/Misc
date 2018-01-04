@@ -1,6 +1,7 @@
 # Unencrypted Boot partition with encrypted root and swap partitions with LVM
 #Part 2 includes default options for locale and charset
 #Post installation holds optional software. May also install default configs for software
+# later configs will be in separate folder. This script will only hold the config name and respective proper pathname.
 
 # If want, before running script, dd drive with random and then with zero.
 ## dd bs=4M if=/dev/urandom of=/dev/sda status=progress && dd bs=4M if=/dev/zero of=/dev/sda status=progress
