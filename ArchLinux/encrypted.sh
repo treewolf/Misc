@@ -118,9 +118,11 @@ elif [ ${1} -eq "2" ]; then
 elif [ ${1} -eq "post" ]; then
 	pacman -S cups && systemctl enable org.cups.cupsd
 	pacman -S clamav && freshclam && systemctl enable freshclamd # not enabling clamav daemon
+	pacman -S firefox
 	pacman -S i3-wm i3lock i3status
 	pacman -S libreoffice-still #should adjust properties metatags and image memory
 	pacman -S ntp && systemctl enable ntpd
+	pacman -S openssh && pacman -S openvpn
 	pacman -S rxvt-unicode #must add config for .Xdefaults and global
 		#URxvt*transparent: true
 		#URxvt*shading: 40
