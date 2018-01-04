@@ -120,7 +120,7 @@ elif [ ${1} -eq "post" ]; then
 	pacman -S clamav && freshclam && systemctl enable freshclamd # not enabling clamav daemon
 	pacman -S i3-wm i3lock i3status
 	pacman -S libreoffice-still #should adjust properties metatags and image memory
-	pacman -S ntp && systemctl enable ntp
+	pacman -S ntp && systemctl enable ntpd
 	pacman -S rxvt-unicode #must add config for .Xdefaults and global
 		#URxvt*transparent: true
 		#URxvt*shading: 40
