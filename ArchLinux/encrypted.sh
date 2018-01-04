@@ -9,25 +9,20 @@
 # ALL GLOBAL VARIABLES BE SET HERE
 
 # Encrypted volume name
-VOLUME=
-
+VOLUME=encvol
 # Encrypted volume sizes
-SIZE_ROOT=
-SIZE_SWAP=
-
+SIZE_ROOT=100G
+SIZE_SWAP=12G
 # uuid of the root partition
 # run 'blkid' and look for the root
 #ROOT_UUID=`blkid|grep -oP '(?<=/dev/sda2: UUID=")[0-9,a-f,-]*'`
 DEV_UUID=`uuidgen`
-
 # Hostname of computer system
-HOSTNAME=
-
+HOSTNAME=Windows8.1
 # User name of first non-root user
 USERNAME=
-
 # Set to 1 if installing box with touchpad, 0 if not
-IS_LAPTOP=
+IS_LAPTOP=1
 
 ##### MAKE SURE ABOVE STEPS ARE COMPLETED ######
 
@@ -35,7 +30,6 @@ if [ ${1} -eq "1" ]; then
 	parted -s /dev/sda mklabel msdos
 	parted -s /dev/sda -a optimal mkpart primary 2MB 110MB set 1 boot on
 	parted -s /dev/sda -a optimal mkpart primary 110MB 100% set 2 lvm on
-	
 	cryptsetup luksFormat --uuid=${DEV_UUID} /dev/sda2
 	cryptsetup open /dev/sda2 cryptolvm
 	pvcreate /dev/mapper/cryptolvm
@@ -73,7 +67,7 @@ elif [ ${1} -eq "2" ]; then
 	ln -s /usr/share/zoneinfo/America/Los_Angeles /etc/localtime
 	hwclock --systohc --utc
 	
-	sed -i -e '/^HOOKS/c\HOOKS=(base systemd keyboard autodetect modconf sd-vconsole block sd-lvm2 filesystems fsck)' /etc/mkinitcpio.conf
+	sed -i -e '/^HOOKS/c\HOOKS=(base systemd autodetect keyboard modconf block sd-vconsole sd-encrypt sd-lvm2 fsck filesystems)' /etc/mkinitcpio.conf
 	#create vconsole.conf because not made automatically
 	touch /etc/vconsole.conf
 	mkinitcpio -p linux
