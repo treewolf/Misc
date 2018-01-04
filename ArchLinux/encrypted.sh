@@ -116,6 +116,8 @@ elif [ ${1} -eq "2" ]; then
 	echo "	exit"
 	echo "	sh ${0} 3"
 elif [ ${1} -eq "post" ]; then
+	systemctl enable iptables
+
 	pacman -S cups && systemctl enable org.cups.cupsd
 	pacman -S clamav && freshclam && systemctl enable freshclamd # not enabling clamav daemon
 	pacman -S firefox
