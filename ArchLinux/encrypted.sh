@@ -2,21 +2,25 @@
 #Part 2 includes default options for locale and charset
 #Post installation holds optional software. May also install default configs for software
 
-### ALL GLOBAL VARIABLES BE SET HERE ###
+# If want, before running script, dd drive with random and then with zero.
+## dd bs=4M if=/dev/urandom of=/dev/sda status=progress && dd bs=4M if=/dev/zero of=/dev/sda status=progress
+
+##### ALL GLOBAL VARIABLES BE SET HERE #####
 # Encrypted volume name
-VOLUME=encvol
-# Encrypted volume sizes
-SIZE_ROOT=100G
-SIZE_SWAP=12G
+VOLUME=
+# Encrypted volume sizes M=megabyte G=gigabyte 
+SIZE_ROOT=
+SIZE_SWAP=
 # uuid of the root partition
 #ROOT_UUID=`blkid|grep -oP '(?<=/dev/sda2: UUID=")[0-9,a-f,-]*'`
+# new uuid for luks encrypted partition
 DEV_UUID=`uuidgen`
-# Hostname of computer system
-HOSTNAME=Windows8.1
+# Hostname of computer system, no periods
+HOSTNAME=
 # User name of first non-root user
 USERNAME=
 # Set to 1 if installing box with touchpad, 0 if not
-IS_LAPTOP=1
+IS_LAPTOP=
 
 ##### MAKE SURE ABOVE STEPS ARE COMPLETED ######
 
@@ -56,7 +60,6 @@ elif [ ${1} -eq "2" ]; then
 	locale-gen
 	echo LANG=en_US.UTF-8 > /etc/locale.conf
 	export LANG=en_US.UTF-8
-	#in case localtime file exists (usually when rebuilding from arch)
 	rm /etc/localtime
 	ln -s /usr/share/zoneinfo/America/Los_Angeles /etc/localtime
 	hwclock --systohc --utc
@@ -66,6 +69,12 @@ elif [ ${1} -eq "2" ]; then
 	mkinitcpio -p linux
 
 	#nano /etc/pacman.conf if want more repositories
+	## aur
+	#[archlinuxfr]
+	#SigLevel = Never
+	#Server = http://repo.archlinux.fr/$arch
+	##[blackarch]
+	#Server = http://mirror.team-cymru.org/blackarch/$repo/os/$arch
 
 	pacman -Syu --noconfirm
 	echo "Set root password: "
@@ -113,6 +122,14 @@ elif [ ${1} -eq "post" ]; then
 	pacman -S libreoffice-still #should adjust properties metatags and image memory
 	pacman -S ntp && systemctl enable ntp
 	pacman -S rxvt-unicode #must add config for .Xdefaults and global
+		#URxvt*transparent: true
+		#URxvt*shading: 40
+		#URxvt*background: #000000
+		#URxvt*foreground: #cccccc
+		#URxvt*scrollBar: false
+		#URxvt*saveLines: 32767
+		#URxvt*font: xft:hack:size=9:antialias=true ##if ttf-hack installed
+		#URxvt*font: 8x13 ##if ttf-hack not installed
 	pacman -S ttf-hack #must edit /usr/share/fonts/40* and 60*, put hack first
 	
 elif [ ${1} -eq "3" ]; then
