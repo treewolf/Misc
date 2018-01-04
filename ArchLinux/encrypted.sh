@@ -87,6 +87,8 @@ elif [ ${1} -eq "2" ]; then
 	# Defaults:ALL timestamp_timeout=0
 
 	pacman -S --noconfirm grub
+	sed -i -e '/^GRUB_ENABLE_CRYPTODISK.*/c\GRUB_ENABLE_CRYPTODISK=Y' /etc/default/grub
+	sed -i -e '/^GRUB_CMDLINE_LINUX_DEFAULT.*/c\GRUB_CMDLINE_LINUX_DEFAULT=""' /etc/default/grub
         echo 'GRUB_PRELOAD_MODULES="lvm"' >> /etc/default/grub
 	echo GRUB_CMDLINE_LINUX=\"luks.uuid=${DEV_UUID}\" >> /etc/default/grub
         cryptdevice=/dev/${VOLUME}/root:${VOLUME}-root
