@@ -101,7 +101,7 @@ elif [ ${1} -eq "2" ]; then
 	grub-mkconfig -o /boot/grub/grub.cfg
 	pacman -S --noconfirm iw wpa_supplicant connman
 	systemctl enable connman
-	pacman -S --noconfirm xorg-apps xorg-server xorg
+	pacman -S --noconfirm xorg-apps xorg-server xorg xorg-xinit
 	# volume
 	pacman -S --noconfirm alsa-utils
 	# touchpad
