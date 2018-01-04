@@ -1,20 +1,14 @@
-# Connect pendrive, keyboard, ethernet
-# Boot up from pendrive
+# Unencrypted Boot partition with encrypted root and swap partitions with LVM
+#Part 2 includes default options for locale and charset
+#Post installation holds optional software. May also install default configs for software
 
-# cfdisk
-#	- clear all partitions
-#	- /dev/sda1 = /boot partition type 8300 with x>=100M
-#	- /dev/sda2 = partition with type 8E00 that will be encrypted and contain /home /root and /swap
-
-# ALL GLOBAL VARIABLES BE SET HERE
-
+### ALL GLOBAL VARIABLES BE SET HERE ###
 # Encrypted volume name
 VOLUME=encvol
 # Encrypted volume sizes
 SIZE_ROOT=100G
 SIZE_SWAP=12G
 # uuid of the root partition
-# run 'blkid' and look for the root
 #ROOT_UUID=`blkid|grep -oP '(?<=/dev/sda2: UUID=")[0-9,a-f,-]*'`
 DEV_UUID=`uuidgen`
 # Hostname of computer system
@@ -66,7 +60,6 @@ elif [ ${1} -eq "2" ]; then
 	rm /etc/localtime
 	ln -s /usr/share/zoneinfo/America/Los_Angeles /etc/localtime
 	hwclock --systohc --utc
-	
 	sed -i -e '/^HOOKS/c\HOOKS=(base systemd autodetect keyboard modconf block sd-vconsole sd-encrypt sd-lvm2 fsck filesystems)' /etc/mkinitcpio.conf
 	#create vconsole.conf because not made automatically
 	touch /etc/vconsole.conf
@@ -95,7 +88,6 @@ elif [ ${1} -eq "2" ]; then
         root=/dev/mapper/${VOLUME}-root
         swap=/dev/mapper/${VOLUME}-swap
 	grub-install /dev/sda
-	
 	pacman -S --noconfirm os-prober
 	grub-mkconfig -o /boot/grub/grub.cfg
 	pacman -S --noconfirm iw wpa_supplicant connman
@@ -103,7 +95,6 @@ elif [ ${1} -eq "2" ]; then
 	pacman -S --noconfirm xorg-apps xorg-server xorg
 	# volume
 	pacman -S --noconfirm alsa-utils
-
 	# touchpad
 	case "$IS_LAPTOP" in
 		1)
@@ -111,11 +102,19 @@ elif [ ${1} -eq "2" ]; then
 		0)
 			echo "Options read no touchpad: pacman -S xf86-input-synaptics if error";;
 	esac
-
-	echo "DONE INSTALLATION. AFTER REBOOT READ 'post installation' SECTION"
+	echo "DONE INSTALLATION. AFTER REBOOT READ 'post installation' SECTION or run 'sh ${0} post'"
 	echo "Before rebooting, type"
-	echo "	sh ${0} 3" 
-	exit
+	echo "	exit"
+	echo "	sh ${0} 3"
+elif [ ${1} -eq "post" ]; then
+	pacman -S cups && systemctl enable org.cups.cupsd
+	pacman -S clamav && freshclam && systemctl enable freshclamd # not enabling clamav daemon
+	pacman -S i3-wm i3lock i3status
+	pacman -S libreoffice-still #should adjust properties metatags and image memory
+	pacman -S ntp && systemctl enable ntp
+	pacman -S rxvt-unicode #must add config for .Xdefaults and global
+	pacman -S ttf-hack #must edit /usr/share/fonts/40* and 60*, put hack first
+	
 elif [ ${1} -eq "3" ]; then
 	umount -R /mnt && reboot
 else
