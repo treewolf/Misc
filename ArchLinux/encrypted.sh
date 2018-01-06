@@ -29,7 +29,7 @@ if [ ${1} -eq "1" ]; then
 	parted -s /dev/sda mklabel msdos
 	parted -s /dev/sda -a optimal mkpart primary 2MB 110MB set 1 boot on
 	parted -s /dev/sda -a optimal mkpart primary 110MB 100% set 2 lvm on
-	cryptsetup luksFormat --verify-passphrase --hash=sha512 --key-size=512 --cipher=aes-xts-plain64 --uuid=${DEV_UUID} /dev/sda2
+	cryptsetup luksFormat --verify-passphrase --hash=sha512 --key-size=512 --uuid=${DEV_UUID} /dev/sda2
 	cryptsetup open /dev/sda2 cryptolvm
 	pvcreate /dev/mapper/cryptolvm
 	vgcreate ${VOLUME} /dev/mapper/cryptolvm
