@@ -15,7 +15,7 @@ SIZE_SWAP=
 # uuid of the root partition
 #ROOT_UUID=`blkid|grep -oP '(?<=/dev/sda2: UUID=")[0-9,a-f,-]*'`
 # new uuid for luks encrypted partition
-DEV_UUID=`uuidgen`
+DEV_UUID=`uuidgen`// doesnt work, save for uuid of /dev/sda2
 # Hostname of computer system, no periods
 HOSTNAME=
 # User name of first non-root user
@@ -90,8 +90,8 @@ elif [ ${1} -eq "2" ]; then
 	# Defaults:ALL timestamp_timeout=0
 
 	pacman -S --noconfirm grub
-	sed -i -e '/^GRUB_ENABLE_CRYPTODISK.*/c\GRUB_ENABLE_CRYPTODISK=Y' /etc/default/grub
-	sed -i -e '/^GRUB_CMDLINE_LINUX_DEFAULT.*/c\GRUB_CMDLINE_LINUX_DEFAULT=""' /etc/default/grub
+	sed -i -e '/.*GRUB_ENABLE_CRYPTODISK.*/c\GRUB_ENABLE_CRYPTODISK=Y' /etc/default/grub
+	sed -i -e '/.*GRUB_CMDLINE_LINUX_DEFAULT.*/c\GRUB_CMDLINE_LINUX_DEFAULT=""' /etc/default/grub
         echo 'GRUB_PRELOAD_MODULES="lvm"' >> /etc/default/grub
 	echo GRUB_CMDLINE_LINUX=\"luks.uuid=${DEV_UUID}\" >> /etc/default/grub
         cryptdevice=/dev/${VOLUME}/root:${VOLUME}-root
