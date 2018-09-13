@@ -15,7 +15,9 @@ SIZE_SWAP=
 # uuid of the root partition
 #ROOT_UUID=`blkid|grep -oP '(?<=/dev/sda2: UUID=")[0-9,a-f,-]*'`
 # new uuid for luks encrypted partition
-DEV_UUID=`uuidgen`// doesnt work, save for uuid of /dev/sda2
+#DEV_UUID=`uuidgen`// doesnt work, save for uuid of /dev/sda2
+DEV_UUID=`blkid|grep -e "/dev/sda2"|awk '{print $2}'|awk -F = '{print $2}'|awk -F \" '{print $2}'`
+
 # Hostname of computer system, no periods
 HOSTNAME=
 # User name of first non-root user
