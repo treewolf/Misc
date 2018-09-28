@@ -3,7 +3,6 @@
 #installation steps
 
 #GLOBAL VARS - SET THESE ACCORDINGLY
-DEV_UUID=`blkid|grep -e "/dev/sda3"|awk '{print $2}'|awk -F = '{print $2}'|awk -F \" '{print $2}'`
 HOSTNAME=myhostname
 NUM_OF_CPU_CORE=1
 SIZE_ROOT=100G
@@ -21,6 +20,8 @@ parted -s /dev/sda mklabel gpt
 parted -s /dev/sda -a optimal mkpart primary 1Mib 3Mib name 1 grub set 1 bios_grub on
 parted -s /dev/sda -a optimal mkpart primary 3Mib 131Mib name 2 boot set 2 boot on
 parted -s /dev/sda -a optimal mkpart primary 131Mib 100%b name 3 lvm set 3 lvm on
+
+DEV_UUID=`blkid|grep -e "/dev/sda3"|awk -F \" '{print $4}'`
 
 #encrypt
 cryptsetup luksFormat --verify-passphrase --hash=sha512 --key-size=512 --cipher=aes-xts-plain64 --uuid=${DEV_UUID} /dev/sda3
