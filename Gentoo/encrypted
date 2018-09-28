@@ -1,0 +1,197 @@
+#!/bin/sh
+
+#installation steps
+
+#GLOBAL VARS - SET THESE ACCORDINGLY
+DEV_UUID=`blkid|grep -e "/dev/sda3"|awk '{print $2}'|awk -F = '{print $2}'|awk -F \" '{print $2}'`
+HOSTNAME=myhostname
+NUM_OF_CPU_CORE=1
+SIZE_ROOT=100G
+SIZE_SWAP=12G
+USERNAME=user
+VOLUME=enc-vol
+
+#Set up partition - 1M = 2048sector
+# sda1	2M		type 4 fat16				bios boot
+# sda2	128M	type 83 linux 	bootable	boot
+# sda3 	8G/12G	type 82						swap
+# sda4	rest	type 83 linux				root
+
+parted -s /dev/sda mklabel gpt
+parted -s /dev/sda -a optimal mkpart primary 1Mib 3Mib name 1 grub set 1 bios_grub on
+parted -s /dev/sda -a optimal mkpart primary 3Mib 131Mib name 2 boot set 2 boot on
+parted -s /dev/sda -a optimal mkpart primary 131Mib 100%b name 3 lvm set 3 lvm on
+
+#encrypt
+cryptsetup luksFormat --verify-passphrase --hash=sha512 --key-size=512 --cipher=aes-xts-plain64 --uuid=${DEV_UUID} /dev/sda3
+cryptsetup open /dev/sda3 cryptolvm
+pvcreate /dev/mapper/cryptolvm
+vgcreate ${VOLUME} /dev/mapper/cryptolvm
+lvcreate -L ${SIZE_SWAP} ${VOLUME} -n swap
+lvcreate -L ${SIZE_ROOT} ${VOLUME} -n root
+lvcreate -l 100%FREE ${VOLUME} -n home
+
+#make file systems
+mkfs.vfat /dev/sda1
+mkfs.ext2 -j -T small /dev/sda2
+mkfs.ext4 /dev/mapper/${VOLUME}-root
+mkfs.ext4 /dev/mapper/${VOLUME}-home
+mkswap /dev/mapper/${VOLUME}-swap
+
+#make mount points if not existing
+mkdir /mnt/gentoo
+
+#mount logical volumes and turn on swap
+mount /dev/mapper/${VOLUME}-root /mnt/gentoo
+swapon /dev/mapper/${VOLUME}
+
+#WARNING, INSECURE IF ON UNKNOWN NETWORK
+ntpd -q -g
+
+#Download the stage 3 from
+#https://www.gentoo.org/downloads/#other-arches
+#using amd64:systemd
+cd /mnt/gentoo
+curl -L http://distfiles.gentoo.org/releases/amd64/autobuilds/20180413/systemd/stage3-amd64-systemd-20180413.tar.bz2 > g.tar.bz2
+
+tar xpf g.tar.bz2 --xattrs-include='*.*' --numeric-owner
+
+#customize /mnt/gentoo/etc/portage/make.conf 
+sed -i -e '/^CFLAGS/c\CFLAGS="-march=native -O2"' /mnt/gentoo/etc/portage/make.conf
+echo MAKEOPTS='"'-j`(expr ${NUM_OF_CPU_CORE} + 1)`'"' >> /mnt/gentoo/etc/portage/make.conf
+
+#configure mirrors
+mirrorselect -i -o >> /mnt/gentoo/etc/portage/make.conf
+mkdir --parents /mnt/gentoo/etc/portage/repos.conf
+cp /mnt/gentoo/usr/share/portage/config/repos.conf /mnt/gentoo/etc/portage/repos.conf/gentoo.conf
+
+cp --dereference /etc/resolv.conf /mnt/gentoo/etc/
+
+#mount
+mount --types proc /proc /mnt/gentoo/proc
+mount --rbind /sys /mnt/gentoo/sys 
+mount --make-rslave /mnt/gentoo/sys 
+mount --rbind /dev /mnt/gentoo/dev 
+mount --make-rslave /mnt/gentoo/dev 
+
+#mount shm fs
+test -L /dev/shm && rm /dev/shm && mkdir /dev/shm
+mount -t tmpfs -o nosuid,nodev,noexec shm /dev/shm
+chmod 1777 /dev/shm
+
+#chroot
+chroot /mnt/gentoo /bin/bash 
+source /etc/profile 
+export PS1="(chroot) ${PS1}"
+mount /dev/sda2 /boot
+
+emerge-webrsync
+
+#necessary for systemd, optional for rest
+#may take a couple hours to complete
+emerge --update --deep --newuse @world
+
+#continue using systemd handbook
+#https://wiki.gentoo.org/wiki/Systemd#USE_flags
+
+emerge sys-kernel/gentoo-sources
+ln -sf /proc/self/mounts /etc/mtab
+
+emerge --unmerge sys-kernel/genkernel
+emerge sys-kernel/dracut
+emerge sys-kernel/genkernel-next
+emerge sys-fs/cryptsetup
+
+#modify for /usr partition
+echo add_dracutmodules+='"'usrmount'"' >> /etc/dracut.conf
+sed -i -e '/^#UDEV/c\UDEV="yes"' /etc/genkernel.conf
+
+####https://wisewords.neocities.org/technology/setup-gentoo-virtualbox.html
+## step 16 and 17
+#blkid
+#nano fstab
+genkernel --luks --lvm --no-zfs all
+
+#make sure /etc/portage/make.conf has systemd use flag
+sed -i -e '/^USE/c\USE="bindist mmx sse sse2 systemd"' /etc/portage/make.conf
+echo 'VIDEO_CARDS="intel"' >> /etc/portage/make.conf
+echo 'INPUT_DEVICES="libinput keyboard mouse synaptics"' >> /etc/portage/make.conf
+
+emerge -avDN @world
+
+#grub2
+echo GRUB_PLATFORMS='"'pc'"' >> /etc/portage/make.conf
+emerge sys-boot/grub
+sed -i -e '/^# GRUB_CMDLINE_LINUX="init/c\GRUB_CMDLINE_LINUX="init=/usr/lib/systemd/systemd"' /etc/default/grub
+grub-install /dev/sda
+grub-mkconfig -o /boot/grub/grub.cfg
+
+#user login 
+echo root password
+passwd
+useradd -mg users -G wheel,users,audio,lp,cdrom,portage -s /bin/bash $USERNAME
+echo $USERNAME password
+passwd $USERNAME
+
+#install sudo
+##app-admin/sudo ?
+emerge sudo
+
+#cleanup and shutdown
+exit
+
+######
+cd
+umount -l /mnt/gentoo/dev{/shm,/pts,}
+umount -l /mnt/gentoo{/boot,/proc,}
+poweroff
+
+#network
+systemctl enable systemd-networkd.service
+echo "[Match]" >> /etc/systemd/network/50-dhcp.network
+echo "Name=en*" >> /etc/systemd/network/50-dhcp.network
+echo "" >> etc/systemd/network/50-dhcp.network 
+echo "[Network]" >> etc/systemd/network/50-dhcp.network
+echo "DHCP=yes" >> etc/systemd/network/50-dhcp.network
+systemctl enable systemd-networkd.service
+systemctl start systemd-networkd.service
+ln -snf /run/systemd/resolve/resolv.conf /etc/resolv.conf
+systemctl enable systemd-resolved.service
+systemctl start systemd-resolved.service 
+
+#post customization as root
+echo "America/Los_Angeles">/etc/timezone
+emerge --config sys-lib/timezone-data
+
+#edit /etc/locale.gen for english
+sed -i -e '/^#en_US ISO-8859-1/c\en_US ISO-8859-1' /etc/locale.gen
+sed -i -e '/^#en_US.UTF-8 UTF-8/c\en_US.UTF-8 UTF-8' /etc/locale.gen
+locale-gen
+env-update && source /etc/profile
+
+#set hostname
+hostnamectl set-hostname "${HOSTNAME}"
+
+#x window
+emerge x11-base/xorg-server
+emerge x11-base/xorg-drivers
+env-update
+source /etc/profile
+emerge x11-apps/xinit
+
+
+##software##################
+emerge app-editors/vim
+emerge app-portage/gentoolkit
+
+emerge net-wireless/wpa_supplicant
+systemctl enable wpa_supplicant
+systemctl start wpa_supplicant
+
+#if no internet, manual set
+#https://wiki.gentoo.org/wiki/Handbook:X86/Installation/Networking#Using_ifconfig_and_route
+#
+#ifconfig enp3s0 {ip addr} broadcast {broadcast} netmask {netmask} up
+#route add default gw {gateway} - if virtual machine, then 10.0.2.2 else your normal
+#
+#vm is gw 10.0.2.2, broadcast is 192.168.1.0 netmask 255.0.0.0
