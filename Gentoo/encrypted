@@ -9,6 +9,7 @@ SIZE_ROOT=100G
 SIZE_SWAP=12G
 USERNAME=user
 VOLUME=encvol
+URL="http://distfiles.gentoo.org/releases/amd64/autobuilds/current-stage3-amd64-systemd/stage3-amd64-systemd-20180923.tar.bz2"
 
 #Set up partition - 1M = 2048sector
 # sda1	2M		type 4 fat16				bios boot
@@ -53,7 +54,7 @@ elif [ ${1} -eq "2" ]; then
 	#https://www.gentoo.org/downloads/#other-arches
 	#using amd64:systemd
 	cd /mnt/gentoo
-	curl -L http://distfiles.gentoo.org/releases/amd64/autobuilds/20180413/systemd/stage3-amd64-systemd-20180413.tar.bz2 > g.tar.bz2
+	curl -L ${URL} > g.tar.bz2
 
 	tar xpf g.tar.bz2 --xattrs-include='*.*' --numeric-owner
 
@@ -80,6 +81,7 @@ elif [ ${1} -eq "2" ]; then
 	mount -t tmpfs -o nosuid,nodev,noexec shm /dev/shm
 	chmod 1777 /dev/shm
 	#chroot
+	cp ${0} /mnt/gentoo
 	chroot /mnt/gentoo /bin/bash 
 elif [ ${1} -eq "3" ]; then
 	source /etc/profile 
@@ -123,7 +125,12 @@ elif [ ${1} -eq "3" ]; then
 	#grub2
 	echo GRUB_PLATFORMS='"'pc'"' >> /etc/portage/make.conf
 	emerge sys-boot/grub
-	sed -i -e '/^# GRUB_CMDLINE_LINUX="init/c\GRUB_CMDLINE_LINUX="init=/usr/lib/systemd/systemd"' /etc/default/grub
+	sed -i -e '/.*GRUB_CMDLINE_LINUX="init/c\GRUB_CMDLINE_LINUX="init=/usr/lib/systemd/systemd"' /etc/default/grub
+	sed -i -e '/.*GRUB_ENABLE_CRYPTODISK.*/c\GRUB_ENABLE_CRYPTODISK=Y' /etc/default/grub
+	sed -i -e '/.*GRUB_CMDLINE_LINUX_DEFAULT.*/c\GRUB_CMDLINE_LINUX_DEFAULT=""' /etc/default/grub
+	echo 'GRUB_PRELOAD_MODULES="lvm"' >> /etc/default/grub
+	echo GRUB_CMDLINE_LINUX=\"luks.uuid=${DEV_UUID}\" >> /etc/default/grub
+        
 	grub-install /dev/sda
 	grub-mkconfig -o /boot/grub/grub.cfg
 
