@@ -90,6 +90,8 @@ elif [ ${1} -eq "3" ]; then
 	cd /usr/src/linux
 	make menuconfig
 	make
+	make modules_install
+	make install
 	cd -
 
 	ln -sf /proc/self/mounts /etc/mtab
@@ -104,7 +106,7 @@ elif [ ${1} -eq "3" ]; then
 	## step 16 and 17
 	#blkid
 	#nano fstab
-	genkernel all 
+	genkernel --install --no-ramdisk-modules initramfs 
 
 	#make sure /etc/portage/make.conf has systemd use flag
 	sed -i -e '/^USE/c\USE="bindist mmx sse sse2 systemd"' /etc/portage/make.conf

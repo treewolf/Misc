@@ -9,6 +9,7 @@ SIZE_ROOT=100G
 SIZE_SWAP=12G
 USERNAME=user
 VOLUME=encvol
+DEV_UUID=""
 URL="http://distfiles.gentoo.org/releases/amd64/autobuilds/current-stage3-amd64-systemd/stage3-amd64-systemd-20180928.tar.bz2"
 
 #Set up partition - 1M = 2048sector
@@ -106,6 +107,8 @@ elif [ ${1} -eq "3" ]; then
 	cd /usr/src/linux
 	make menuconfig
 	make
+	make modules_install
+	make install
 	cd -
 
 	ln -sf /proc/self/mounts /etc/mtab
@@ -123,7 +126,7 @@ elif [ ${1} -eq "3" ]; then
 	## step 16 and 17
 	#blkid
 	#nano fstab
-	genkernel --luks --lvm initramfs 
+	genkernel --install --luks --lvm initramfs 
 
 	#make sure /etc/portage/make.conf has systemd use flag
 	sed -i -e '/^USE/c\USE="bindist mmx sse sse2 systemd"' /etc/portage/make.conf
