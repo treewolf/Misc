@@ -104,6 +104,14 @@ elif [ ${1} -eq "3" ]; then
 	## step 16 and 17
 	#blkid
 	#nano fstab
+
+	ROOTUUID=`blkid|grep /dev/sda4|awk -F " " '{print($2)}'|awk -F \" '{print($2)}'`
+	BOOTUUID=`blkid|grep /dev/sda2|awk -F " " '{print($2)}'|awk -F \" '{print($2)}'`
+	SWAPUUID=`blkid|grep /dev/sda3|awk -F " " '{print($2)}'|awk -F \" '{print($2)}'`
+	echo "UUID=${ROOTUUID} / ext4 noatime,rw 0 1" >> /etc/fstab
+	echo "UUID=${BOOTUUID} /boot ext2 noauto,noatime 1 2" >> /etc/fstab
+	echo "UUID=${SWAPUUID} none swap sw 0 0" >> /etc/fstab
+	
 	genkernel --install --no-ramdisk-modules initramfs 
 
 	#make sure /etc/portage/make.conf has systemd use flag
