@@ -5,8 +5,6 @@
 #GLOBAL VARS - SET THESE ACCORDINGLY
 HOSTNAME=myhostname
 NUM_OF_CPU_CORE=1
-SIZE_ROOT=100G
-SIZE_SWAP=12G
 USERNAME=user
 URL="http://distfiles.gentoo.org/releases/amd64/autobuilds/current-stage3-amd64-systemd/stage3-amd64-systemd-20180928.tar.bz2"
 
