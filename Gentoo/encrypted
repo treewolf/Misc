@@ -9,7 +9,7 @@ SIZE_ROOT=100G
 SIZE_SWAP=12G
 USERNAME=user
 VOLUME=encvol
-URL="http://distfiles.gentoo.org/releases/amd64/autobuilds/current-stage3-amd64-systemd/stage3-amd64-systemd-20180923.tar.bz2"
+URL="http://distfiles.gentoo.org/releases/amd64/autobuilds/current-stage3-amd64-systemd/stage3-amd64-systemd-20180928.tar.bz2"
 
 #Set up partition - 1M = 2048sector
 # sda1	2M		type 4 fat16				bios boot
@@ -81,7 +81,7 @@ elif [ ${1} -eq "2" ]; then
 	mount -t tmpfs -o nosuid,nodev,noexec shm /dev/shm
 	chmod 1777 /dev/shm
 	#chroot
-	cp ${0} /mnt/gentoo
+	cp /root/${0} /mnt/gentoo
 	chroot /mnt/gentoo /bin/bash 
 elif [ ${1} -eq "3" ]; then
 	source /etc/profile 
@@ -98,22 +98,32 @@ elif [ ${1} -eq "3" ]; then
 	#https://wiki.gentoo.org/wiki/Systemd#USE_flags
 
 	emerge sys-kernel/gentoo-sources
+	
+	#VITAL-----------------------------------------------------------------------
+	#this is where need to set kernel flags for encryption
+	#or do this after generating genkernel
+	#https://wiki.gentoo.org/wiki/Dm-crypt#Configuring_fstab
+	cd /usr/src/linux
+	make menuconfig
+	make
+	cd -
+
 	ln -sf /proc/self/mounts /etc/mtab
 
 	emerge --unmerge sys-kernel/genkernel
-	emerge sys-kernel/dracut
-	emerge sys-kernel/genkernel-next
+	#emerge sys-kernel/dracut
 	emerge sys-fs/cryptsetup
+	USE="cryptsetup" emerge sys-kernel/genkernel-next
 
 	#modify for /usr partition
-	echo add_dracutmodules+='"'usrmount'"' >> /etc/dracut.conf
+	#echo add_dracutmodules+='"'usrmount'"' >> /etc/dracut.conf
 	sed -i -e '/^#UDEV/c\UDEV="yes"' /etc/genkernel.conf
 
 	####https://wisewords.neocities.org/technology/setup-gentoo-virtualbox.html
 	## step 16 and 17
 	#blkid
 	#nano fstab
-	genkernel --luks --lvm --no-zfs all
+	genkernel --luks --lvm initramfs 
 
 	#make sure /etc/portage/make.conf has systemd use flag
 	sed -i -e '/^USE/c\USE="bindist mmx sse sse2 systemd"' /etc/portage/make.conf
@@ -144,6 +154,9 @@ elif [ ${1} -eq "3" ]; then
 	#install sudo
 	##app-admin/sudo ?
 	emerge sudo
+
+	###??? make menuconfig or try editting /etc/buildkernel.conf, then build kernel
+	#### for device mapper support and crypto algoritmhms???
 
 	#cleanup and shutdown
 	exit
