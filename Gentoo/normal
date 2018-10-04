@@ -188,12 +188,19 @@ elif [ ${1} -eq "5" ]; then
 
 
 	##software##################
-	emerge app-editors/vim
+	#emerge app-editors/vim
+	#untested
+	USE="X gpm lua tcl terminal vim-pager" emerge app-editors/vim
+	
 	emerge app-portage/gentoolkit
 
 	emerge net-wireless/wpa_supplicant
 	systemctl enable wpa_supplicant
 	systemctl start wpa_supplicant
+
+	#security
+	#untested use flags
+	USE="conntrack static-libs" net-firewall/iptables
 fi
 
 #if no internet, manual set
