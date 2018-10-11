@@ -64,7 +64,6 @@ elif [ ${1} -eq "2" ]; then
 	cp /root/${0} /mnt/gentoo
 	chroot /mnt/gentoo /bin/bash 
 elif [ ${1} -eq "3" ]; then
-	source /etc/profile 
 	export PS1="(chroot) ${PS1}"
 	mount /dev/sda2 /boot
 
@@ -72,25 +71,25 @@ elif [ ${1} -eq "3" ]; then
 
 	#may take a couple hours to complete
 	eselect profile set 1
+	source /etc/profile
 	emerge --update --deep --newuse @world
 
 	emerge sys-kernel/gentoo-sources
 	
 	#VITAL-----------------------------------------------------------------------
 	#this is where need to set kernel flags for encryption
-	#or do this after generating genkernel
 	#https://wiki.gentoo.org/wiki/Dm-crypt#Configuring_fstab
 	cd /usr/src/linux
 	make menuconfig
-	make
-	make modules_install
-	make install
+	# comment out these steps if using genkernel all
+	#make
+	#make modules_install
+	#make install
 	cd -
 
 	ln -sf /proc/self/mounts /etc/mtab
 
-	emerge --unmerge sys-kernel/genkernel
-	emerge sys-kernel/genkernel-next
+	emerge sys-kernel/genkernel
 
 	#modify for /usr partition
 	sed -i -e '/^#UDEV/c\UDEV="yes"' /etc/genkernel.conf
@@ -107,10 +106,9 @@ elif [ ${1} -eq "3" ]; then
 	echo "UUID=${BOOTUUID} /boot ext2 noauto,noatime 1 2" >> /etc/fstab
 	echo "UUID=${SWAPUUID} none swap sw 0 0" >> /etc/fstab
 	
-	genkernel --install --no-ramdisk-modules initramfs 
+	genkernel --install --no-mrproper all
 
-	#make sure /etc/portage/make.conf has systemd use flag
-	sed -i -e '/^USE/c\USE="bindist mmx sse sse2 systemd"' /etc/portage/make.conf
+	sed -i -e '/^USE/c\USE="bindist mmx sse sse2"' /etc/portage/make.conf
 	echo 'VIDEO_CARDS="intel"' >> /etc/portage/make.conf
 	echo 'INPUT_DEVICES="libinput keyboard mouse synaptics"' >> /etc/portage/make.conf
 
@@ -119,7 +117,6 @@ elif [ ${1} -eq "3" ]; then
 	#grub2
 	echo GRUB_PLATFORMS='"'pc'"' >> /etc/portage/make.conf
 	emerge sys-boot/grub
-	sed -i -e '/.*GRUB_CMDLINE_LINUX="init/c\GRUB_CMDLINE_LINUX="init=/usr/lib/systemd/systemd"' /etc/default/grub
 	sed -i -e '/.*GRUB_CMDLINE_LINUX_DEFAULT.*/c\GRUB_CMDLINE_LINUX_DEFAULT=""' /etc/default/grub
         
 	grub-install /dev/sda
@@ -133,11 +130,7 @@ elif [ ${1} -eq "3" ]; then
 	passwd $USERNAME
 
 	#install sudo
-	##app-admin/sudo ?
-	emerge sudo
-
-	###??? make menuconfig or try editting /etc/buildkernel.conf, then build kernel
-	#### for device mapper support and crypto algoritmhms???
+	emerge app-admin/sudo
 
 	#cleanup and shutdown
 	exit
@@ -148,6 +141,9 @@ elif [ ${1} -eq "4" ]; then
 	umount -l /mnt/gentoo{/boot,/proc,}
 	poweroff
 elif [ ${1} -eq "5" ]; then
+	#edit sudoers
+	visudo
+
 	#network
 
 	#post customization as root
@@ -167,7 +163,6 @@ elif [ ${1} -eq "5" ]; then
 	emerge x11-base/xorg-server
 	emerge x11-base/xorg-drivers
 	env-update
-	source /etc/profile
 	emerge x11-apps/xinit
 
 
@@ -178,7 +173,7 @@ elif [ ${1} -eq "5" ]; then
 	
 	emerge app-portage/gentoolkit
 
-	emerge net-wireless/wpa_supplicanta
+	emerge net-wireless/wpa_supplicant
 
 	#untested
 	rc-update add wpa_supplicant default
